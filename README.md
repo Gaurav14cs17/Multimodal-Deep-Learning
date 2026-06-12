@@ -403,17 +403,7 @@ You are free to:
 - Adapt it for courses or workshops (with attribution)
 - Fork and modify for your own projects
 
----
 
-## Author
-
-**Gaurav Goswami**
-
-- GitHub: [@ggoswami](https://github.com/ggoswami)
-
-If you find this project helpful, consider giving it a star on GitHub!
-
----
 
 ## Acknowledgments
 
