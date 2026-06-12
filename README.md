@@ -374,7 +374,7 @@ $$\text{CrossAttn}(Z_{\text{txt}}, Z_{\text{img}}) = \text{softmax}\!\left(\frac
 
 **Autoregressive Generation** — captioning as conditional language modeling:
 
-$$P(\mathbf{y} | I) = \prod_{t=1}^{T} P(y_t | y_{<t}, I)$$
+$$P(\mathbf{y} \mid I) = \prod_{t=1}^{T} P(y_t \mid y_1, \ldots, y_{t-1}, I)$$
 
 ### Stage 3: Efficient Finetuning — Training on Limited Hardware
 
@@ -412,7 +412,7 @@ $$\mathcal{L}_{\text{KD}} = \alpha T^2 \, \text{KL}\!\left(\text{softmax}\!\left
 | **GELU** | $x \cdot \Phi(x) \approx 0.5x(1 + \tanh[\sqrt{2/\pi}(x + 0.044715x^3)])$ | 01 |
 | **Cosine Similarity** | $\mathbf{v}^\top \mathbf{t} / (\|\mathbf{v}\| \|\mathbf{t}\|)$ | 01, 02 |
 | **InfoNCE** | $-\log \frac{e^{s_{ii}/\tau}}{\sum_j e^{s_{ij}/\tau}}$ | 02, 03 |
-| **Captioning** | $-\sum_t \log P(y_t \mid y_{<t}, I)$ | 02 |
+| **Captioning** | $-\sum_t \log P(y_t \mid y_{1:t-1}, I)$ | 02 |
 | **VQA** | $\text{softmax}(W_a \cdot \text{Fuse}(f_I, f_Q))$ | 02 |
 | **AdamW** | $\theta_t = \theta_{t-1} - \eta(\hat{m}_t / \sqrt{\hat{v}_t + \epsilon} + \lambda\theta_{t-1})$ | 03 |
 | **Cosine LR** | $\frac{\eta_{\max}}{2}(1 + \cos(\pi t / T))$ | 03 |
