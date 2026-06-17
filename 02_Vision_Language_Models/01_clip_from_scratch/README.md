@@ -140,6 +140,112 @@ Batch of $N = 3$ pairs, $\tau = 0.07$:
 
 ---
 
+## Mathematical Proofs
+
+### Proof: Symmetric Cross-Entropy Loss — Why Both i→t and t→i?
+
+**Theorem:** CLIP's symmetric loss equals the average of two $N$-way classification cross-entropies.
+
+**Step 1 — Image-to-text as classification:**
+
+For image $i$, treat the correct text index as class $i$ among $N$ candidates. Cross-entropy:
+
+$$
+\mathcal{L}_{\text{i2t}} = -\frac{1}{N}\sum_{i=1}^{N} \log \frac{e^{S_{ii}/\tau}}{\sum_{j=1}^{N} e^{S_{ij}/\tau}}
+$$
+
+**Why:** Each row of the similarity matrix defines "which text matches this image?"
+
+**Step 2 — Text-to-image (transpose direction):**
+
+$$
+\mathcal{L}_{\text{t2i}} = -\frac{1}{N}\sum_{i=1}^{N} \log \frac{e^{S_{ii}/\tau}}{\sum_{j=1}^{N} e^{S_{ji}/\tau}}
+$$
+
+**Why:** Without this term, the model could align images to texts but not vice versa — retrieval would be asymmetric.
+
+**Step 3 — Symmetrize:**
+
+$$
+\mathcal{L}_{\text{CLIP}} = \frac{1}{2}(\mathcal{L}_{\text{i2t}} + \mathcal{L}_{\text{t2i}})
+$$
+
+**Step 4 — Gradient on positive pair $S_{ii}$:**
+
+From the i2t term: $\partial \mathcal{L}/\partial S_{ii} \propto -(1 - P_{ii})$ where $P_{ii} = \text{softmax}(S_i/\tau)_i$. This pushes $S_{ii}$ upward until $P_{ii} \to 1$. **∎**
+
+#### Numerical Example
+
+$N=2$, $S = \begin{pmatrix} 0.8 & 0.2 \\ 0.3 & 0.9 \end{pmatrix}$, $\tau = 0.1$:
+
+$$
+\mathcal{L}_{\text{i2t}} = -\frac{1}{2}\left[\log\frac{e^{8}}{e^{8}+e^{2}} + \log\frac{e^{9}}{e^{3}+e^{9}}\right] \approx 0.001
+$$
+
+Symmetric loss $\approx 0.001$ (both directions confident on diagonal).
+
+---
+
+### Proof: Temperature Gradient $\partial \mathcal{L}/\partial \tau$
+
+**Setup:** $S_{ij} = \text{sim}(\mathbf{v}_i, \mathbf{t}_j)$, $P_{ij} = \text{softmax}(S_i/\tau)_j$.
+
+**Step 1 — Rewrite loss for sample $i$:**
+
+$$
+\ell_i = -\log P_{ii} = -\frac{S_{ii}}{\tau} + \log\sum_j e^{S_{ij}/\tau}
+$$
+
+**Step 2 — Differentiate w.r.t. $\tau$:**
+
+$$
+\frac{\partial \ell_i}{\partial \tau} = \frac{S_{ii}}{\tau^2} - \frac{1}{\tau^2} \cdot \frac{\sum_j S_{ij} e^{S_{ij}/\tau}}{\sum_j e^{S_{ij}/\tau}} = \frac{1}{\tau^2}\left(S_{ii} - \sum_j P_{ij} S_{ij}\right)
+$$
+
+**Why:** Lower $\tau$ increases $\partial \ell / \partial S_{ij}$ magnitude — sharper distributions produce stronger gradients on hard negatives.
+
+**Step 3 — Batch average:**
+
+$$
+\frac{\partial \mathcal{L}}{\partial \tau} = \frac{1}{N\tau^2}\sum_i\left(S_{ii} - \sum_j P_{ij} S_{ij}\right)
+$$
+
+**∎**
+
+#### Numerical Example
+
+$S_i = [0.9, 0.2, 0.1]$, $\tau = 0.07$: $P_i \approx [0.9999, 0.00005, 0.00005]$. $\sum_j P_{ij} S_{ij} \approx 0.90001$. Gradient $\approx (0.9 - 0.90001)/\tau^2 \approx -0.002$ (slightly decrease $\tau$ to sharpen further).
+
+---
+
+### Proof: L2 Normalization Constrains Embeddings to the Unit Hypersphere
+
+**Claim:** L2 normalization maps any nonzero $\mathbf{v} \in \mathbb{R}^d$ to $\hat{\mathbf{v}} \in \mathbb{S}^{d-1} = \{\mathbf{x} : \lVert \mathbf{x} \rVert = 1\}$.
+
+**Step 1 — Define normalization:**
+
+$$
+\hat{\mathbf{v}} = \frac{\mathbf{v}}{\lVert \mathbf{v} \rVert_2}, \quad \lVert \mathbf{v} \rVert_2 = \sqrt{\sum_{i=1}^{d} v_i^2}
+$$
+
+**Step 2 — Verify unit norm:**
+
+$$
+\lVert \hat{\mathbf{v}} \rVert_2^2 = \sum_{i=1}^{d} \left(\frac{v_i}{\lVert \mathbf{v} \rVert}\right)^2 = \frac{\sum_i v_i^2}{\lVert \mathbf{v} \rVert^2} = 1
+$$
+
+**Step 3 — Decouple magnitude from direction:**
+
+Any $\mathbf{v} = \lVert \mathbf{v} \rVert \cdot \hat{\mathbf{v}}$. Cosine similarity depends only on $\hat{\mathbf{v}}, \hat{\mathbf{t}}$, not raw magnitudes — preventing the model from "cheating" via embedding scale.
+
+**∎**
+
+#### Numerical Example
+
+$\mathbf{v} = [3, 4]$, $\mathbf{t} = [6, 8]$: $\hat{\mathbf{v}} = [0.6, 0.8]$, $\hat{\mathbf{t}} = [0.6, 0.8]$, $\text{sim} = 1.0$ (same direction). Raw dot product $= 50$ would conflate magnitude with alignment.
+
+---
+
 ## Zero-Shot Classification
 
 CLIP enables classification **without any training on labels** — just provide text descriptions:
@@ -201,6 +307,46 @@ where $\hat{\mathbf{t}}_k = \text{CLIP}_{\text{text}}(\texttt{"a photo of a [cla
 
 - Module 01 notebooks (cosine similarity, encoders, fusion strategies)
 - Comfortable with PyTorch `nn.Module` and training loops
+
+---
+
+## 🔬 Worked Examples in the Notebook
+
+### Example 1: Zero-Shot Classification
+Classify images using only text prompts — no task-specific training:
+- Encode 5 class descriptions, classify 50 test images
+- Step-by-step: similarity → softmax → argmax prediction
+- Confusion matrix and per-class accuracy visualization
+
+### Example 2: Image-Text Retrieval with Recall@K
+Full bidirectional retrieval evaluation:
+- Image→Text and Text→Image retrieval on 100 pairs
+- Compute R@1, R@5, R@10 metrics
+- Visualize similarity matrix (diagonal should be bright)
+
+### Example 3: CLIP Scaling Analysis
+How batch size affects contrastive learning:
+- Batch size 32 → 32K: negatives, memory, and baseline loss
+- Train with different batch sizes, measure alignment quality
+- Why CLIP needs batch size 32,768 (32K negatives!)
+
+> 💡 **Run the notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/02_Vision_Language_Models/01_clip_from_scratch/01_clip_from_scratch.ipynb)
+
+---
+
+## 📄 Paper Figures in the Notebook
+
+| Figure | Paper | Year | Key Concept |
+|--------|-------|------|-------------|
+| CLIP Overview (`../../assets/paper_figures/clip_overview.png`) | Radford et al. — [arXiv:2103.00020](https://arxiv.org/abs/2103.00020) | 2021 | Official OpenAI CLIP architecture diagram |
+| CLIP Contrastive Matrix + Pseudocode | Radford et al. — [arXiv:2103.00020](https://arxiv.org/abs/2103.00020) | 2021 | Algorithm 1: symmetric cross-entropy over similarity matrix |
+| SigLIP vs CLIP vs ALIGN | Zhai et al. / Jia et al. — [arXiv:2303.15343](https://arxiv.org/abs/2303.15343) | 2023 | Sigmoid pairwise loss, noisy data scaling |
+
+### Additional Papers Covered
+
+- **SigLIP** (Zhai et al., 2023) — Sigmoid loss eliminates cross-device communication
+- **ALIGN** (Jia et al., 2021) — 1.8B noisy pairs, scale compensates for noise
+- **OpenCLIP** (Ilharco et al., 2021) — Open-source CLIP reproduction
 
 ---
 

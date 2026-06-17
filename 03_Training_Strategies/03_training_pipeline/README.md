@@ -413,6 +413,100 @@ $$
 
 ---
 
+## Mathematical Proofs
+
+### Proof: DPO Derivation from RLHF — Implicit Reward
+
+**Step 1 — RLHF objective:** Maximize reward $r(x,y)$ with KL penalty to reference $\pi_{\text{ref}}$:
+
+$$
+\max_\pi \mathbb{E}_{y \sim \pi}[r(x,y)] - \beta \text{KL}(\pi(\cdot\mid x) \,\|\, \pi_{\text{ref}}(\cdot\mid x))
+$$
+
+**Step 2 — Optimal policy (closed form):**
+
+$$
+\pi^*(y \mid x) = \frac{1}{Z(x)} \pi_{\text{ref}}(y \mid x) \exp\left(\frac{r(x,y)}{\beta}\right)
+$$
+
+where $Z(x) = \sum_y \pi_{\text{ref}}(y \mid x) e^{r(x,y)/\beta}$.
+
+**Step 3 — Solve for implicit reward:**
+
+$$
+r(x,y) = \beta \log \frac{\pi^*(y \mid x)}{\pi_{\text{ref}}(y \mid x)} + \beta \log Z(x)
+$$
+
+**Step 4 — Bradley-Terry preference model:** $P(y_w \succ y_l \mid x) = \sigma(r(x,y_w) - r(x,y_l))$. Substituting and canceling $Z(x)$:
+
+$$
+\mathcal{L}_{\text{DPO}} = -\log \sigma\left(\beta\left[\log\frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \log\frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}\right]\right)
+$$
+
+**∎**
+
+#### Numerical Example
+
+$\log \pi_\theta(y_w) - \log \pi_{\text{ref}}(y_w) = 0.5$, same for loser $= -0.2$: margin $= 0.5 - (-0.2) = 0.7$. With $\beta = 0.1$: $\mathcal{L} = -\log \sigma(0.07) = -\log(0.517) = 0.659$.
+
+---
+
+### Proof: GRPO Group-Relative Advantage Normalization
+
+**Step 1 — Sample $G$ responses per prompt with rewards $R_1, \ldots, R_G$.**
+
+**Step 2 — Group statistics:**
+
+$$
+\bar{R} = \frac{1}{G}\sum_{i=1}^{G} R_i, \quad \sigma_R = \sqrt{\frac{1}{G}\sum_{i=1}^{G}(R_i - \bar{R})^2}
+$$
+
+**Step 3 — Advantage:**
+
+$$
+A_i = \frac{R_i - \bar{R}}{\sigma_R + \epsilon}
+$$
+
+**Why:** Normalizing within the group removes prompt difficulty bias — only responses better than the group average get positive advantage.
+
+**Step 4 — PPO-style clipped update:**
+
+$$
+\mathcal{L}_{\text{GRPO}} = -\frac{1}{G}\sum_{i=1}^{G} \min\left(\rho_i A_i, \text{clip}(\rho_i, 1-\epsilon, 1+\epsilon) A_i\right)
+$$
+
+where $\rho_i = \pi_\theta(y_i)/\pi_{\text{old}}(y_i)$. **∎**
+
+#### Numerical Example
+
+$G=4$, rewards $[1.0, 0.0, 0.5, 0.5]$: $\bar{R} = 0.5$, $\sigma_R = 0.408$. Advantages: $A = [1.22, -1.22, 0, 0]$. Best response gets strong positive update; worst gets negative.
+
+---
+
+### Proof: KL Penalty in PPO Prevents Reward Hacking
+
+**Step 1 — Unconstrained RL:** Policy drifts to exploit spurious reward model patterns (reward hacking).
+
+**Step 2 — KL-regularized objective:**
+
+$$
+\mathcal{L} = \mathbb{E}[\text{PPO loss}] + \beta \text{KL}(\pi_\theta \,\|\, \pi_{\text{ref}})
+$$
+
+**Step 3 — KL divergence definition:**
+
+$$
+\text{KL}(\pi_\theta \,\|\, \pi_{\text{ref}}) = \mathbb{E}_{y \sim \pi_\theta}\left[\log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)}\right]
+$$
+
+**Step 4 — Effect:** Gradient penalizes moving too far from $\pi_{\text{ref}}$, preserving language quality while optimizing reward. As $\pi_\theta$ diverges, KL grows unboundedly — constraining the policy to the trusted region. **∎**
+
+#### Numerical Example
+
+If $\pi_\theta$ assigns 0.9 to a hacky response vs $\pi_{\text{ref}} = 0.01$: KL contribution $\approx \log(90) = 4.5$ nats per token — large penalty unless reward gain exceeds $\beta \times 4.5$.
+
+---
+
 ## What You'll Build
 
 - Complete production training loop (AdamW + cosine LR + gradient accumulation + mixed precision)
@@ -430,6 +524,34 @@ $$
 - Module 03 Notebooks 01–02 (contrastive learning, pretraining objectives)
 - Understanding of cross-entropy loss and optimization
 - Familiarity with PyTorch training loops
+
+---
+
+## 🔬 Worked Examples in the Notebook
+
+### DPO Loss — Implementation with Numerical Trace
+- Step-by-step DPO computation for 4 preference pairs
+- Trace: policy log-probs → reference log-probs → reward margin → sigmoid loss
+- Train a simple DPO model for 100 steps
+- Visualize: loss curve and reward margin (positive = policy prefers winners)
+
+> 💡 **Run the notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/03_training_pipeline/03_training_pipeline.ipynb)
+
+---
+
+## 📄 Paper Figures in the Notebook
+
+| Figure | Paper | Year | Key Concept |
+|--------|-------|------|-------------|
+| RLHF Pipeline (`../../assets/paper_figures/rlhf_pipeline.png`) | Ouyang et al. — [arXiv:2203.02155](https://arxiv.org/abs/2203.02155) | 2022 | Official HuggingFace RLHF reward-model diagram |
+| RLHF Pipeline (InstructGPT) | Ouyang et al. — [arXiv:2203.02155](https://arxiv.org/abs/2203.02155) | 2022 | SFT → Reward Model → PPO |
+| PPO vs DPO vs GRPO | Schulman / Rafailov / Shao | 2017-24 | 4 models vs 2 models vs 1 model comparison |
+
+### Additional Papers Covered
+
+- **DPO** (Rafailov et al., 2023) — Direct preference optimization, no reward model needed
+- **GRPO** (Shao et al., 2024) — Group-relative advantages with verifiable rewards
+- **TIES Merging** (Yadav et al., 2023) — Trim, elect sign, disjoint merge for weight merging
 
 ---
 

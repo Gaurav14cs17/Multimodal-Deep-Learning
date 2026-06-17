@@ -130,6 +130,96 @@ For each selected token (15% of all tokens):
 
 **What it teaches:** Visual grounding — the model learns which image regions correspond to which words. To predict `[MASK]` = "cat", it must attend to the cat region in the image.
 
+### MLM Loss — Step-by-Step Numerical Example
+
+**Setup:** Vocabulary size $V=5$, masked token at position $t=3$ (ground truth: "cat" = index 2).
+
+**Step 1:** Model outputs logits $\mathbf{z} = [0.5, 1.0, 3.2, 0.8, 0.3]$ for positions $\{$dog, bird, cat, mat, the$\}$.
+
+**Step 2:** Softmax probabilities:
+
+$$
+P(\text{cat}) = \frac{e^{3.2}}{e^{0.5} + e^{1.0} + e^{3.2} + e^{0.8} + e^{0.3}} = \frac{24.53}{1.65 + 2.72 + 24.53 + 2.23 + 1.35} = \frac{24.53}{32.48} \approx 0.755
+$$
+
+**Step 3:** Cross-entropy loss for this masked token:
+
+$$
+\mathcal{L}_{\text{MLM}} = -\log(0.755) \approx 0.281
+$$
+
+**Step 4:** With image grounding — if cross-attention correctly attends to cat region, logits improve to $\mathbf{z}' = [0.2, 0.5, 4.5, 0.3, 0.1]$:
+
+$$
+P(\text{cat}) \approx 0.945, \quad \mathcal{L}_{\text{MLM}} = -\log(0.945) \approx 0.057
+$$
+
+Cross-modal MLM reduces loss by 80% when visual grounding is correct.
+
+---
+
+## Mathematical Proofs
+
+### Proof: MLM Loss — From Masked Positions to Cross-Entropy
+
+**Step 1 — Mask set:** $\mathcal{M} \subset \{1, \ldots, T\}$, masked tokens replaced per BERT protocol.
+
+**Step 2 — Conditional distribution:**
+
+$$
+P(y_t \mid \mathbf{y}_{\setminus \mathcal{M}}, I) = \text{softmax}(W_{\text{out}} \mathbf{h}_t)_ {y_t}
+$$
+
+where $\mathbf{h}_t$ comes from cross-modal encoder with image $I$.
+
+**Step 3 — Cross-entropy over masked positions only:**
+
+$$
+\mathcal{L}_{\text{MLM}} = -\sum_{t \in \mathcal{M}} \log P(y_t^* \mid \mathbf{y}_{\setminus \mathcal{M}}, I)
+$$
+
+**Step 4 — Per-token expansion:**
+
+$$
+\log P(y_t^* \mid \cdot) = z_{y_t^*} - \log\sum_{v=1}^{V} e^{z_v}
+$$
+
+**Why:** Only masked positions contribute — unmasked tokens provide context via bidirectional attention. **∎**
+
+#### Numerical Example
+
+From above: $z_{\text{cat}} = 3.2$, $\sum_v e^{z_v} = 32.48$, $P(\text{cat}) = 0.755$, $\mathcal{L} = -\log(0.755) = 0.281$. With visual grounding: $P(\text{cat}) = 0.945$, $\mathcal{L} = 0.057$.
+
+---
+
+### Proof: Multi-Objective Training — Why ITC + ITM + MLM Helps
+
+**Step 1 — Joint loss:**
+
+$$
+\mathcal{L} = \alpha \mathcal{L}_{\text{ITC}} + \beta \mathcal{L}_{\text{ITM}} + \gamma \mathcal{L}_{\text{MLM}}
+$$
+
+**Step 2 — Gradient decomposition:**
+
+$$
+\nabla_\theta \mathcal{L} = \alpha \nabla \mathcal{L}_{\text{ITC}} + \beta \nabla \mathcal{L}_{\text{ITM}} + \gamma \nabla \mathcal{L}_{\text{MLM}}
+$$
+
+**Step 3 — Complementary gradients:**
+
+| Objective | Gradient acts on | What it teaches |
+|-----------|-----------------|-----------------|
+| ITC | Projection heads, [CLS] | Global alignment |
+| ITM | Cross-encoder fusion | Match vs non-match discrimination |
+| MLM | Token-level cross-attn | Visual grounding per word |
+
+**Step 4 — Why multi-objective helps:** ITC alone cannot distinguish hard negatives (similar captions); ITM adds binary discrimination; MLM forces patch-level alignment — gradients reach different layers and prevent collapse to coarse features. **∎**
+
+#### Numerical Example
+
+BLIP ablation: ITC only R@1 = 78.4%; +ITM → 82.1%; +MLM → 83.5%. Each added objective reduces retrieval error by ~2–4% — gradients from MLM improve cross-attention weights used indirectly by ITC.
+
 ---
 
 ## Objective 4: Generation (Autoregressive Captioning)
@@ -243,6 +333,32 @@ $$
 - Module 03 Notebook 01 (contrastive learning deep dive)
 - Understanding of cross-entropy, binary cross-entropy
 - Familiarity with BERT masking and autoregressive generation
+
+---
+
+## 🔬 Worked Examples in the Notebook
+
+### Multi-Objective Training Loop
+- Train ITC + ITM + MLM simultaneously with weighted objectives
+- 60 epochs with per-objective loss tracking
+- Ablation study: which objectives help most?
+- Visualize training curves and ablation bar chart
+
+> 💡 **Run the notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/02_pretraining_objectives/02_pretraining_objectives.ipynb)
+
+---
+
+## 📄 Paper Figures in the Notebook
+
+| Figure | Paper | Year | Key Concept |
+|--------|-------|------|-------------|
+| Pretraining Landscape | Multiple papers | 2021-23 | Which model uses which objectives (ITC/ITM/MLM/LM/MIM) |
+
+### Additional Papers Covered
+
+- **CoCa** (Yu et al., 2022) — Contrastive + captioning dual decoder, split unimodal/multimodal
+- **BEiT-3** (Wang et al., 2022) — Unified masked modeling across vision, language, and multimodal
+- **ALBEF** (Li et al., 2021) — Align before fuse, momentum distillation
 
 ---
 

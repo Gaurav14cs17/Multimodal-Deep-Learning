@@ -1,12 +1,15 @@
 # Module 01: Multimodal Foundations
 
-> **Time:** 1-2 hours | **Notebooks:** 3 | **Visuals:** 12 plots | **Difficulty:** Intermediate
+> **Time:** 2-3 hours | **Notebooks:** 6 | **Visuals:** 12+ plots | **Difficulty:** Intermediate
 
 | Notebook | Open in Colab |
 |----------|---------------|
 | `01_what_is_multimodal/01_what_is_multimodal.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/01_what_is_multimodal/01_what_is_multimodal.ipynb) |
 | `02_modality_encoders/02_modality_encoders.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/02_modality_encoders/02_modality_encoders.ipynb) |
 | `03_fusion_strategies/03_fusion_strategies.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/03_fusion_strategies/03_fusion_strategies.ipynb) |
+| `04_attention_mechanism/04_attention_mechanism.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/04_attention_mechanism/04_attention_mechanism.ipynb) |
+| `05_transformer_architecture/05_transformer_architecture.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/05_transformer_architecture/05_transformer_architecture.ipynb) |
+| `06_tokenization_embeddings/06_tokenization_embeddings.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/06_tokenization_embeddings/06_tokenization_embeddings.ipynb) |
 
 ---
 
@@ -974,3 +977,13 @@ This is strictly more expressive than addition or Hadamard product but costs $O(
 Now that you understand encoders and fusion, it's time to build real models:
 
 **[02_Vision_Language_Models/01_clip_from_scratch/01_clip_from_scratch.ipynb](../02_Vision_Language_Models/01_clip_from_scratch/01_clip_from_scratch.ipynb)** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/02_Vision_Language_Models/01_clip_from_scratch/01_clip_from_scratch.ipynb)
+
+---
+
+## Notebooks 4–6 (New — Prerequisite Deep Dives)
+
+| # | Notebook | Topic |
+|---|----------|-------|
+| 04 | [04_attention_mechanism](04_attention_mechanism/README.md) | Self-attention, multi-head, cross-attention, complexity |
+| 05 | [05_transformer_architecture](05_transformer_architecture/README.md) | Full encoder-decoder, positional encoding, causal mask |
+| 06 | [06_tokenization_embeddings](06_tokenization_embeddings/README.md) | BPE, WordPiece, patch embedding |

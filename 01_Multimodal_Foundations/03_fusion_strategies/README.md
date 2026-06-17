@@ -113,6 +113,38 @@ $$
 
 Each row sums to 1: for text token $i$, $\alpha_{ij}$ tells us how much it "looks at" image patch $j$.
 
+### Cross-Attention — Step-by-Step Numerical Example
+
+**Setup:** $T=2$ text tokens, $N=3$ image patches, $d_k=2$.
+
+**Step 1:** Project to Q, K, V:
+
+$$
+\mathbf{Q} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}, \quad
+\mathbf{K} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{pmatrix}, \quad
+\mathbf{V} = \begin{pmatrix} 2 & 0 \\ 0 & 1 \\ 1 & 1 \end{pmatrix}
+$$
+
+**Step 2:** Compute scores $\mathbf{Q}\mathbf{K}^\top / \sqrt{2}$:
+
+$$
+\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{2}} = \begin{pmatrix} 0.707 & 0 & 0.707 \\ 0 & 0.707 & 0.707 \end{pmatrix}
+$$
+
+**Step 3:** Softmax row 0 (token "color"):
+
+$$
+\alpha_{0,:} = \text{softmax}([0.707, 0, 0.707]) \approx [0.422, 0.156, 0.422]
+$$
+
+**Step 4:** Weighted values for token 0:
+
+$$
+\mathbf{o}_0 = 0.422 \begin{pmatrix} 2 \\ 0 \end{pmatrix} + 0.156 \begin{pmatrix} 0 \\ 1 \end{pmatrix} + 0.422 \begin{pmatrix} 1 \\ 1 \end{pmatrix} = \begin{pmatrix} 1.266 \\ 0.578 \end{pmatrix}
+$$
+
+Token 0 attends equally to patches 0 and 2 (both score 0.707), ignoring patch 1.
+
 ```
   Attention matrix (text × image patches):
 
@@ -185,6 +217,87 @@ With $r = 64$: $64 \times (768 + 768) = 98{,}304$ — a **3000× reduction**.
 
 ---
 
+## Mathematical Proofs
+
+### Proof: Cross-Attention — Q from One Modality, K and V from Another
+
+**Claim:** Cross-attention lets modality A query modality B by using $Q$ from A and $K, V$ from B.
+
+**Step 1 — Define modality-specific projections:**
+
+Given text features $Z_{\text{txt}} \in \mathbb{R}^{M \times D}$ and image features $Z_{\text{img}} \in \mathbb{R}^{N \times D}$:
+
+$$
+Q = Z_{\text{txt}} W_Q, \quad K = Z_{\text{img}} W_K, \quad V = Z_{\text{img}} W_V
+$$
+
+**Why:** Queries encode "what the text is looking for"; keys/values encode "what the image offers at each patch."
+
+**Step 2 — Compute cross-modal compatibility:**
+
+$$
+S = \frac{QK^\top}{\sqrt{d_k}} \in \mathbb{R}^{M \times N}
+$$
+
+Entry $S_{ij} = q_i^\top k_j / \sqrt{d_k}$ measures how much text token $i$ attends to image patch $j$.
+
+**Step 3 — Softmax over image patches (columns of $K$):**
+
+$$
+\alpha_{ij} = \frac{\exp(S_{ij})}{\sum_{l=1}^{N} \exp(S_{il})}, \quad \sum_{j=1}^{N} \alpha_{ij} = 1
+$$
+
+**Why:** Each text token distributes one unit of attention across all image regions.
+
+**Step 4 — Aggregate image values:**
+
+$$
+\text{CrossAttn}(Z_{\text{txt}}, Z_{\text{img}})_i = \sum_{j=1}^{N} \alpha_{ij} v_j
+$$
+
+Matrix form: $\text{CrossAttn} = \text{softmax}(QK^\top/\sqrt{d_k}) V$. **∎**
+
+#### Numerical Example
+
+$M=2$ text tokens, $N=3$ patches, $d_k=2$. After softmax row 0: $\alpha_{0,:} = [0.422, 0.156, 0.422]$. Output for token 0: $0.422 v_1 + 0.156 v_2 + 0.422 v_3$ — equal weight on patches 1 and 3.
+
+---
+
+### Proof: Bilinear Fusion — Rank Analysis
+
+**Claim:** Full bilinear fusion $z_k = \mathbf{v}^\top W_k \mathbf{t}$ has rank at most $\min(d_v, d_t)$ per output, and parameter count grows as $O(d_v d_t d_{\text{out}})$.
+
+**Step 1 — Write bilinear form:**
+
+$$
+\mathbf{z} = \mathbf{v}^\top \mathcal{W} \mathbf{t}, \quad \mathcal{W} \in \mathbb{R}^{d_v \times d_t \times d_{\text{out}}}
+$$
+
+Each slice $W_k \in \mathbb{R}^{d_v \times d_t}$ is a rank-$\min(d_v, d_t)$ matrix at most.
+
+**Step 2 — Rank bottleneck:**
+
+If $d_v = d_t = 768$ and $d_{\text{out}} = 512$, we need 768×768×512 $\approx$ 302M parameters — most slices are redundant because finetuning updates lie in a low-rank subspace.
+
+**Step 3 — Low-rank factorization (MLB):**
+
+Factor $W_k \approx U_k V_k^\top$ with $U_k \in \mathbb{R}^{d_v \times r}$, $V_k \in \mathbb{R}^{d_t \times r}$:
+
+$$
+\mathbf{z} = (U \mathbf{v}) \odot (V \mathbf{t}), \quad \text{Params} = r(d_v + d_t)
+$$
+
+**Why this works:** Eckart–Young says the best rank-$r$ approximation captures most energy; MLB applies this per interaction. **∎**
+
+#### Numerical Example
+
+$d_v = d_t = 768$, $d_{\text{out}} = 512$, $r = 64$:
+
+- Full bilinear: $768 \times 768 \times 512 = 301,989,888$ params
+- MLB: $64 \times (768 + 768) = 98,304$ params → **3072× reduction**
+
+---
+
 ## Decision Guide — Which Fusion to Use?
 
 ```
@@ -235,6 +348,44 @@ With $r = 64$: $64 \times (768 + 768) = 98{,}304$ — a **3000× reduction**.
 - Notebook 02 (ViT and text encoder internals)
 - Understanding of softmax and matrix multiplication
 - Familiarity with gating mechanisms (sigmoid)
+
+---
+
+## 🔬 Worked Examples in the Notebook
+
+### Example 1: Early Fusion — Numerical Trace
+Concatenate 2 image patches + 3 text tokens, then compute full 5×5 attention:
+- See cross-modal attention patterns (does "txt:cat" attend to "img:cat"?)
+- Measure cross-modal vs intra-modal attention strength
+
+### Example 2: Cross-Attention — Complete Walkthrough
+Trace cross-attention for "cat" querying 4 image patches:
+- Q·K dot products → scaling → softmax → weighted Value sum
+- "cat" correctly attends to cat-patch (highest weight)
+- Full multi-query cross-attention heatmap
+
+### Example 3: Bilinear/MLB Fusion Implementation
+Implement full bilinear and low-rank MLB fusion:
+- Compare parameter counts: Full (1M+) vs MLB rank-32 (12K)
+- At ViT-Base scale: 452M vs 1.6M parameters (282x compression!)
+
+### Example 4: Side-by-Side Training Comparison
+Train concat, add, gated, and bilinear fusion on the SAME task:
+- Loss and accuracy curves for 100 epochs
+- Compare final accuracy and parameter efficiency
+- Winner and most-efficient method identified
+
+> 💡 **Run the notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/03_fusion_strategies/03_fusion_strategies.ipynb)
+
+---
+
+## 📄 Paper Figures in the Notebook
+
+| Figure | Paper | Year | Key Concept |
+|--------|-------|------|-------------|
+| Early Fusion (VisualBERT) | Li et al. — [arXiv:1908.03557](https://arxiv.org/abs/1908.03557) | 2019 | Concatenate vision + text tokens → joint transformer |
+| Co-Attention (ViLBERT) | Lu et al. — [arXiv:1908.02265](https://arxiv.org/abs/1908.02265) | 2019 | Dual-stream transformers with K,V exchange |
+| Cross-Attention Bridge (Perceiver/BLIP-2) | Jaegle et al. / Li et al. — [arXiv:2103.03206](https://arxiv.org/abs/2103.03206) | 2021-23 | Learnable queries + cross-attention to frozen encoders |
 
 ---
 

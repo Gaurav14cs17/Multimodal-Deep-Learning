@@ -1,6 +1,6 @@
 # Module 03: Training Strategies
 
-> **Time:** 2–3 hours | **Notebooks:** 3 | **Visuals:** 11 plots | **Difficulty:** Intermediate–Advanced
+> **Time:** 2–3 hours | **Notebooks:** 5 | **Visuals:** 11+ plots | **Difficulty:** Intermediate–Advanced
 >
 > **This is a CORE FOCUS module** — mastering training is what separates "I understand the theory" from "I can actually build this."
 
@@ -9,6 +9,8 @@
 | `01_contrastive_learning/01_contrastive_learning.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/01_contrastive_learning/01_contrastive_learning.ipynb) |
 | `02_pretraining_objectives/02_pretraining_objectives.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/02_pretraining_objectives/02_pretraining_objectives.ipynb) |
 | `03_training_pipeline/03_training_pipeline.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/03_training_pipeline/03_training_pipeline.ipynb) |
+| `04_multimodal_alignment/04_multimodal_alignment.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/04_multimodal_alignment/04_multimodal_alignment.ipynb) |
+| `05_scaling_laws/05_scaling_laws.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/05_scaling_laws/05_scaling_laws.ipynb) |
 
 ---
 
@@ -1720,7 +1722,7 @@ $$\theta_{\text{merged}} = \theta^{\text{base}} + \sum_k \lambda_k \tilde{\tau}_
 
 | Metric | Value |
 |--------|-------|
-| Total notebooks | 3 |
+| Total notebooks | 5 |
 | Total visualizations | 11 |
 | Training techniques covered | 20 (InfoNCE, SigLIP, ITM, MLM, AdamW, cosine LR, grad accum, mixed precision, checkpointing, SFT, KD, RLHF/PPO, DPO, GRPO, linear soup, task arithmetic, TIES, DARE, model souping, curriculum learning) |
 | RL algorithms with full derivations | 3 (RLHF/PPO, DPO, GRPO) |
@@ -1733,3 +1735,12 @@ $$\theta_{\text{merged}} = \theta^{\text{base}} + \sum_k \lambda_k \tilde{\tau}_
 ## Next Step
 
 **[04_Finetuning_LowCompute/01_lora_from_scratch/01_lora_from_scratch.ipynb](../04_Finetuning_LowCompute/01_lora_from_scratch/01_lora_from_scratch.ipynb)** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/01_lora_from_scratch/01_lora_from_scratch.ipynb) — finetune with 100× fewer parameters using LoRA and QLoRA.
+
+---
+
+## Notebooks 4–5 (Alignment & Scaling)
+
+| # | Notebook | Topic |
+|---|----------|-------|
+| 04 | [04_multimodal_alignment](04_multimodal_alignment/README.md) | Projection heads, temperature, CLIP alignment, Recall@K |
+| 05 | [05_scaling_laws](05_scaling_laws/README.md) | Chinchilla scaling, compute-optimal training |

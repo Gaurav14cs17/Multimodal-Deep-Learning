@@ -191,6 +191,92 @@ This is **Pre-LN** (used in ViT), where LayerNorm is applied **before** attentio
 
 ---
 
+## Mathematical Proofs
+
+### Proof: Self-Attention — Why Q, K, V and $\text{softmax}(QK^\top/\sqrt{d_k})V$?
+
+**Claim:** Attention computes a convex combination of value vectors, where weights come from query–key compatibility.
+
+**Step 1 — Define projections from input $Z \in \mathbb{R}^{n \times D}$:**
+
+$$
+Q = Z W_Q, \quad K = Z W_K, \quad V = Z W_V
+$$
+
+**Why:** $W_Q, W_K, W_V$ are learnable linear maps that let the model decide *what to look for* (Q), *what to match against* (K), and *what to retrieve* (V).
+
+**Step 2 — Compute compatibility scores:**
+
+For query token $i$ and key token $j$, the score is the dot product $q_i^\top k_j$. Stacking all pairs gives $\mathbf{S} = QK^\top \in \mathbb{R}^{n \times n}$.
+
+**Why:** Dot products measure directional similarity in the projected subspace — higher score means "more relevant."
+
+**Step 3 — Normalize scores to a probability distribution:**
+
+$$
+\alpha_{ij} = \frac{\exp(S_{ij}/\sqrt{d_k})}{\sum_{l=1}^{n} \exp(S_{il}/\sqrt{d_k})} = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)_{ij}
+$$
+
+**Why:** Softmax ensures $\sum_j \alpha_{ij} = 1$, so each output is a weighted average of values.
+
+**Step 4 — Aggregate values:**
+
+$$
+\text{output}_i = \sum_{j=1}^{n} \alpha_{ij} v_j = \left(\text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V\right)_i
+$$
+
+**∎**
+
+#### Numerical Example
+
+3 tokens, $d_k = 2$, $Q = \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{pmatrix}$, $K = Q$, $V = \begin{pmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{pmatrix}$.
+
+Scores for token 0: $QK^\top/\sqrt{2} = [0.707, 0, 0.707]$. Softmax $\approx [0.422, 0.156, 0.422]$. Output $\approx 0.422[1,0] + 0.156[0,1] + 0.422[1,1] = [0.844, 0.578]$.
+
+---
+
+### Proof: Why Scale by $\sqrt{d_k}$?
+
+**Claim:** For random vectors $q, k \in \mathbb{R}^{d_k}$ with components $\sim \mathcal{N}(0, 1)$:
+
+$$
+\text{Var}(q \cdot k) = d_k
+$$
+
+**Proof:**
+
+**Step 1:** The dot product is $q \cdot k = \sum_{i=1}^{d_k} q_i k_i$.
+
+**Step 2:** Each $q_i k_i$ has mean 0 and variance:
+
+$$
+\text{Var}(q_i k_i) = \mathbb{E}[q_i^2 k_i^2] - (\mathbb{E}[q_i k_i])^2 = \mathbb{E}[q_i^2]\mathbb{E}[k_i^2] - 0 = 1 \cdot 1 = 1
+$$
+
+**Step 3:** Since the $d_k$ terms are independent:
+
+$$
+\text{Var}(q \cdot k) = \sum_{i=1}^{d_k} \text{Var}(q_i k_i) = d_k
+$$
+
+**Step 4:** Dividing by $\sqrt{d_k}$ gives:
+
+$$
+\text{Var}\left(\frac{q \cdot k}{\sqrt{d_k}}\right) = \frac{d_k}{d_k} = 1
+$$
+
+This keeps the softmax inputs in a reasonable range, preventing gradient vanishing. **∎**
+
+#### Numerical Verification
+
+For $d_k = 64$: unscaled std $\approx \sqrt{64} = 8$, scaled std $\approx 1$.
+
+With scores $[8.2, -7.1, 6.5]$: softmax $\to [0.847, 0.000, 0.153]$ (almost one-hot!)
+
+With scores $[1.02, -0.89, 0.81]$: softmax $\to [0.436, 0.065, 0.354]$ (smooth distribution ✓)
+
+---
+
 ## Part 2: Text Encoder (BERT-style)
 
 ### Pipeline
@@ -261,6 +347,48 @@ This is **Pre-LN** (used in ViT), where LayerNorm is applied **before** attentio
 - Notebook 01 (cosine similarity, InfoNCE basics)
 - Matrix multiplication and tensor reshaping
 - Basic understanding of convolutional vs. attention-based encoders
+
+---
+
+## 🔬 Worked Examples in the Notebook
+
+### Example 1: Self-Attention — Step-by-Step with Real Numbers
+Trace attention for 3 tokens ("cat", "sits", "mat") with $d_k=4$:
+- Compute Q, K, V from input X and weight matrices
+- Raw scores → scaling by $\sqrt{d_k}$ → softmax → weighted sum
+- Visualize: attention heatmap, scaling effect, temperature sensitivity
+
+### Example 2: ViT-Base Memory & Compute Budget
+Calculate exact resource requirements for ViT variants:
+- Parameters: Patch embedding → Position embedding → 12 Transformer layers
+- Memory: FP32/FP16 weights + activations + attention matrices
+- FLOPs: 17.4 GFLOPs per image for ViT-Base
+- Throughput estimates: A100 (~7,000 img/s), T4 (~2,000 img/s)
+- Compare ViT-Tiny through ViT-Large
+
+### Example 3: Simulated Product Search Pipeline
+Build a complete image-text retrieval system:
+- Encode 100 products with ViT + text encoder
+- Image-to-image retrieval: find similar products
+- Text-to-image retrieval: search by description
+- Visualize similarity distributions (same vs different category)
+
+> 💡 **Run the notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/02_modality_encoders/02_modality_encoders.ipynb)
+
+---
+
+## 📄 Paper Figures in the Notebook
+
+| Figure | Paper | Year | Key Concept |
+|--------|-------|------|-------------|
+| ViT Architecture (`../../assets/paper_figures/vit_architecture.png`) | Dosovitskiy et al. — [arXiv:2010.11929](https://arxiv.org/abs/2010.11929) | 2020 | Official Google ViT figure: patches → Transformer |
+| ViT Architecture | Dosovitskiy et al. — [arXiv:2010.11929](https://arxiv.org/abs/2010.11929) | 2020 | Image → patches → Transformer → [CLS] output |
+
+### Additional Papers Covered
+
+- **DeiT** (Touvron et al., 2021) — Data-efficient image transformers with distillation
+- **BEiT** (Bao et al., 2021) — BERT pre-training for image transformers
+- **BERT** (Devlin et al., 2019) — Bidirectional encoder representations from transformers
 
 ---
 

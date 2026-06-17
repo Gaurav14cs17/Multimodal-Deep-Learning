@@ -16,7 +16,7 @@ By the end of this module, you'll have:
 
 - Verified all 20+ dependencies are installed correctly
 - Benchmarked your hardware performance
-- A visual roadmap of the entire 17-notebook learning journey
+- A visual roadmap of the entire 27-notebook learning journey
 
 ---
 
