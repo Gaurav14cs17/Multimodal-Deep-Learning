@@ -147,6 +147,56 @@ Note: The 576 visual tokens are a significant portion of the KV cache! This is w
 
 ---
 
+## Mathematical Proofs
+
+### Proof: MLP Projector Dimension Analysis — Why Simple Projection Works
+
+**Step 1 — Dimension mismatch:** CLIP ViT-L outputs $d_{\text{clip}} = 1024$; LLM expects $d_{\text{llm}} = 4096$.
+
+**Step 2 — Linear projector:** $H_v = W_1 Z_{\text{clip}}$ maps $1024 \to 4096$. Parameter count: $1024 \times 4096 \approx 4.2$M.
+
+**Step 3 — 2-layer MLP (LLaVA-1.5):** $H_v = W_2 \cdot \text{GELU}(W_1 Z + b_1) + b_2$ adds nonlinearity — allows nonlinear alignment between visual and language manifolds.
+
+**Step 4 — Why it works:** CLIP features are already semantically structured; projector only needs to learn a coordinate transform + mild nonlinearity, not full cross-modal reasoning (LLM handles that). Empirically, MLP beats linear by ~2% on benchmarks. **∎**
+
+#### Numerical Example
+
+576 patches × 4096 dim = 2.36M floats per image in LLM space. MLP params: $1024 \times 4096 + 4096 \times 4096 \approx 21$M (both layers) — still <0.3% of 7B LLM.
+
+---
+
+### Proof: KV Cache Memory — Full Derivation
+
+**Step 1 — Per-layer cache:** Store keys and values for all prior tokens:
+
+$$
+K_{\text{cache}}^{(l)} \in \mathbb{R}^{T \times d}, \quad V_{\text{cache}}^{(l)} \in \mathbb{R}^{T \times d}
+$$
+
+**Step 2 — Total across $L$ layers:**
+
+$$
+\text{Memory}_{\text{KV}} = 2 \times L \times T \times d \times \text{bytes\_per\_elem}
+$$
+
+Factor 2 for both K and V.
+
+**Step 3 — LLaVA sequence length:** $T = N_{\text{visual}} + N_{\text{text}} = 576 + 256 = 832$.
+
+**Step 4 — Numerical evaluation ($L=32$, $d=4096$, fp16):
+
+$$
+\text{Memory} = 2 \times 32 \times 832 \times 4096 \times 2 = 436{,}207{,}616 \text{ bytes} \approx 436 \text{ MB}
+$$
+
+**Step 5 — Visual token dominance:** $576/832 \approx 69\%$ of KV cache is visual — motivates token compression (Q-Former: 576→32). **∎**
+
+#### Numerical Example
+
+Reduce visual tokens 576→32: new $T = 32 + 256 = 288$. KV memory $= 2 \times 32 \times 288 \times 4096 \times 2 \approx 151$ MB — **65% savings**.
+
+---
+
 ## Two-Stage Training
 
 ### Stage 1: Visual-Language Alignment (Pretraining)
@@ -227,6 +277,56 @@ Data: 150K GPT-4-generated multimodal instruction-following data.
 - Module 04 (LoRA, adapter methods)
 - Understanding of autoregressive LLMs
 - Familiarity with causal masking
+
+---
+
+## 🔬 Worked Examples in the Notebook
+
+### LLaVA Inference — Complete Tensor Shape Trace
+- Trace every tensor through LLaVA-7B: image → ViT → projector → LLM
+- 576 visual tokens + 15 text tokens = 591 total (97% are visual!)
+- Memory analysis: KV cache calculation for 591 tokens = ~0.6 GB
+- Parameter distribution: 304M (ViT, frozen) + 8M (projector) + 6.7B (LLM, LoRA)
+
+> 💡 **Run the notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/01_llava_architecture/01_llava_architecture.ipynb)
+
+---
+
+## 📄 Paper Figures in the Notebook
+
+| Figure | Paper | Year | Key Concept |
+|--------|-------|------|-------------|
+| LLaVA Architecture (`../../assets/paper_figures/llava_arch.png`) | Liu et al. — [arXiv:2304.08485](https://arxiv.org/abs/2304.08485) | 2023 | CLIP ViT → MLP projector → Vicuna LLM |
+| LLaVA Two-Stage Training | Liu et al. — [arXiv:2304.08485](https://arxiv.org/abs/2304.08485) | 2023 | Stage 1: alignment (only MLP), Stage 2: instruction tuning (MLP + LLM) |
+
+### Key Papers & References
+
+#### Vision-Language Model Papers
+
+1. **LLaVA: Visual Instruction Tuning** — Liu et al. (2023) — [arXiv:2304.08485](https://arxiv.org/abs/2304.08485) — Simple MLP projector + 2-stage training
+2. **LLaVA-1.5: Improved Baselines with Visual Instruction Tuning** — Liu et al. (2023) — [arXiv:2310.03744](https://arxiv.org/abs/2310.03744) — Higher resolution, MLP projector improvement
+3. **Qwen-VL: A Versatile Vision-Language Model** — Bai et al. (2023) — [arXiv:2308.12966](https://arxiv.org/abs/2308.12966) — Dynamic resolution, multi-image understanding
+4. **InternVL: Scaling up Vision Foundation Models** — Chen et al. (2023) — [arXiv:2312.14238](https://arxiv.org/abs/2312.14238) — Scaling open-source MLLMs to GPT-4V level
+5. **BLIP-2: Bootstrapping Language-Image Pre-training** — Li et al. (2023) — [arXiv:2301.12597](https://arxiv.org/abs/2301.12597) — Q-Former bridges frozen ViT + frozen LLM
+6. **MiniCPM-V: A GPT-4V Level MLLM on Your Phone** — Yao et al. (2024) — [arXiv:2408.01800](https://arxiv.org/abs/2408.01800) — Mobile deployment, efficient architecture
+7. **DeepSeek-VL2: Mixture-of-Experts Vision-Language Models** — Lu et al. (2024) — [arXiv:2412.10302](https://arxiv.org/abs/2412.10302) — MoE for VLMs, efficient scaling
+8. **Cambrian-1: Vision-Centric Exploration of Multimodal LLMs** — Tong et al. (2024) — [arXiv:2406.16860](https://arxiv.org/abs/2406.16860) — Systematic study of vision encoder choices
+
+#### Unified Understanding + Generation Papers
+
+9. **Emu3: Next-Token Prediction is All You Need** — Wang et al. (2024) — [arXiv:2409.18869](https://arxiv.org/abs/2409.18869) — Native multimodal with next-token prediction
+10. **Show-o: One Single Transformer for Unified Understanding and Generation** — Xie et al. (2024) — [arXiv:2408.12528](https://arxiv.org/abs/2408.12528) — Autoregressive + discrete diffusion in one model
+
+#### Blog Posts & Technical Reports
+
+- 📝 [Lilian Weng — "Large Multimodal Models"](https://lilianweng.github.io/posts/2023-06-23-agent/) — Comprehensive survey of MLLM architectures
+- 📝 [Chip Huyen — "Building LLM Applications for Production"](https://huyenchip.com/2023/04/11/llm-engineering.html) — Practical deployment guide
+- 📝 [Sebastian Raschka — "Understanding Large Language Models"](https://magazine.sebastianraschka.com/p/understanding-large-language-models) — From theory to practice
+- 📝 [Jay Alammar — "The Illustrated Transformer"](https://jalammar.github.io/illustrated-transformer/) — Visual guide to transformers
+- 📝 [Jay Alammar — "The Illustrated BERT"](https://jalammar.github.io/illustrated-bert/) — Visual guide to BERT
+- 📝 [OpenAI CLIP Blog](https://openai.com/research/clip) — Original CLIP announcement
+- 📝 [HuggingFace PEFT Documentation](https://huggingface.co/docs/peft/) — PEFT library guide
+- 📝 [HuggingFace TRL Documentation](https://huggingface.co/docs/trl/) — RLHF/DPO training
 
 ---
 

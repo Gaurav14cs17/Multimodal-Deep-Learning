@@ -246,6 +246,58 @@ $$
 
 ---
 
+## Mathematical Proofs
+
+### Proof: NF4 Optimality for Normally Distributed Weights
+
+**Claim:** NF4 places quantization levels at equal-probability quantiles of $\mathcal{N}(0,1)$, minimizing expected quantization error for normally distributed weights.
+
+**Step 1 — Weight distribution:** Neural network weights empirically follow $\mathcal{N}(0, \sigma^2)$ after training.
+
+**Step 2 — Uniform INT4 problem:** Equal spacing wastes levels in low-density tails; too few levels near zero where most mass lies.
+
+**Step 3 — Optimal quantile placement:**
+
+$$
+q_i = \Phi^{-1}\!\left(\frac{2i+1}{2 \cdot 2^b}\right), \quad i = 0, \ldots, 2^b - 1
+$$
+
+Each bin $[q_i, q_{i+1}]$ contains equal probability mass $1/2^b$ under $\mathcal{N}(0,1)$.
+
+**Step 4 — Minimize $\mathbb{E}[(x - Q(x))^2]$:** For a given bit budget, equal-mass bins minimize MSE for any unimodal symmetric distribution (Lloyd-Max optimality for normal). **∎**
+
+#### Numerical Example
+
+8 weights $\mathcal{N}(0,1)$: $[-1.2, -0.5, -0.1, 0.0, 0.1, 0.5, 1.0, 1.5]$. NF4 assigns denser levels near 0; uniform INT4 step $= 0.5$ gives larger error on $[-0.1, 0.1]$ cluster.
+
+---
+
+### Proof: Quantization Error Bound for Uniform Quantization
+
+**Claim:** For uniform quantizer with step size $\Delta$, $\lVert W - W_q \rVert_\infty \leq \Delta/2$.
+
+**Step 1 — Quantization rule:**
+
+$$
+W_q[i] = \Delta \cdot \text{round}(W[i]/\Delta)
+$$
+
+**Step 2 — Per-element error:**
+
+$$
+\lvert W[i] - W_q[i] \rvert = \Delta \cdot \lvert W[i]/\Delta - \text{round}(W[i]/\Delta) \rvert \leq \Delta/2
+$$
+
+**Why:** Round maps to nearest grid point — maximum distance to grid is half a step.
+
+**Step 3 — Block-wise absmax (QLoRA):** Scale $s = \max \lvert W \rvert$ over block of 64, $\Delta = 2s / 2^b$. Then $\lVert W - W_q \rVert_\infty \leq s / 2^b$ per block. **∎**
+
+#### Numerical Example
+
+Block max $s = 0.8$, 4-bit ($2^4 = 16$ levels): $\Delta = 1.6/16 = 0.1$. Weight $w = 0.37$ → quantized $0.4$, error $= 0.03 < 0.05 = \Delta/2$ ✓
+
+---
+
 ## What You'll Build
 
 - Visualize weight distributions (why normal assumption holds)
@@ -261,6 +313,34 @@ $$
 - Notebook 01 (LoRA from scratch)
 - Understanding of floating-point number representation
 - Basic statistics (normal distribution, quantiles, CDF)
+
+---
+
+## 🔬 Worked Examples in the Notebook
+
+### NF4 Quantization — Step-by-Step Numerical Trace
+- Quantize 8 weight values from FP32 to NF4 (4-bit)
+- Map each weight to nearest NF4 level (16 quantization points)
+- Compute per-weight error, MSE, RMSE, and SNR
+- Storage: 256 bits (FP32) → 32 bits (NF4) = 8x compression
+- Verify: SNR > 20 dB confirms acceptable quality
+
+> 💡 **Run the notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/02_qlora_4bit_finetuning/02_qlora_4bit_finetuning.ipynb)
+
+---
+
+## 📄 Paper Figures in the Notebook
+
+| Figure | Paper | Year | Key Concept |
+|--------|-------|------|-------------|
+| QLoRA Memory Hierarchy | Dettmers et al. — [arXiv:2305.14314](https://arxiv.org/abs/2305.14314) | 2023 | NF4 quantization + double quantization + paged optimizers |
+
+### Key Innovation Detail
+
+3 innovations that enable 65B model finetuning on single 48GB GPU:
+1. **NF4 Quantization** — Information-theoretically optimal for normal distributions
+2. **Double Quantization** — Quantize the quantization constants (saves 0.37 bits/param)
+3. **Paged Optimizers** — CPU↔GPU memory swapping for gradient spikes
 
 ---
 

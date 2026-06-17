@@ -1,12 +1,17 @@
 # Module 05: Advanced Topics
 
-> **Time:** 2-3 hours | **Notebooks:** 3 | **Visuals:** 7 plots | **Difficulty:** Advanced
+> **Time:** 3-4 hours | **Notebooks:** 8 | **Visuals:** 7+ plots | **Difficulty:** Advanced
 
 | Notebook | Open in Colab |
 |----------|---------------|
 | `01_llava_architecture/01_llava_architecture.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/01_llava_architecture/01_llava_architecture.ipynb) |
 | `02_multimodal_beyond_vision/02_multimodal_beyond_vision.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/02_multimodal_beyond_vision/02_multimodal_beyond_vision.ipynb) |
 | `03_efficient_deployment/03_efficient_deployment.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/03_efficient_deployment/03_efficient_deployment.ipynb) |
+| `04_diffusion_models/04_diffusion_models.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/04_diffusion_models/04_diffusion_models.ipynb) |
+| `05_evaluation_benchmarks/05_evaluation_benchmarks.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/05_evaluation_benchmarks/05_evaluation_benchmarks.ipynb) |
+| `06_multimodal_reasoning/06_multimodal_reasoning.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/06_multimodal_reasoning/06_multimodal_reasoning.ipynb) |
+| `07_text_to_image_video/07_text_to_image_video.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/07_text_to_image_video/07_text_to_image_video.ipynb) |
+| `08_multimodal_agents/08_multimodal_agents.ipynb` | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/08_multimodal_agents/08_multimodal_agents.ipynb) |
 
 ---
 
@@ -723,11 +728,23 @@ With **FP8 KV cache**: $285$ MB per request — doubling batch capacity.
 
 ---
 
+## Notebooks 4–8 (Generation, Evaluation, Reasoning, Agents)
+
+| # | Notebook | Topic |
+|---|----------|-------|
+| 04 | [04_diffusion_models](04_diffusion_models/README.md) | DDPM forward/reverse, noise schedules, cross-attention conditioning |
+| 05 | [05_evaluation_benchmarks](05_evaluation_benchmarks/README.md) | BLEU/METEOR/CIDEr, VQA metrics, MMMU/MME comparison |
+| 06 | [06_multimodal_reasoning](06_multimodal_reasoning/README.md) | Visual CoT, VisProg-style program generation |
+| 07 | [07_text_to_image_video](07_text_to_image_video/README.md) | CLIP-guided generation, latent space visualization |
+| 08 | [08_multimodal_agents](08_multimodal_agents/README.md) | Tool use, visual grounding, ReAct planning |
+
+---
+
 ## Quick Stats
 
 | Metric | Value |
 |--------|-------|
-| Total notebooks | 3 |
+| Total notebooks | 8 |
 | Total visualizations | 7 |
 | Models built | Mini-LLaVA, Audio Encoder, Video Encoder, 3-Modal CLIP |
 | Key equations covered | STFT, Mel scale, InfoNCE, KV cache, quantization error, KD loss, task vectors, TIES |
@@ -743,7 +760,7 @@ With **FP8 KV cache**: $285$ MB per request — doubling batch capacity.
 
 ## Congratulations!
 
-You've completed **17 notebooks**, built **10+ models from scratch**, learned **18 training/finetuning/merging techniques**, and generated **54 visualizations**.
+You've completed **28 notebooks**, built **10+ models from scratch**, learned **18 training/finetuning/merging techniques**, and generated **60+ visualizations**.
 
 You now understand the full mathematical stack — from STFT and Mel filter banks, through causal attention with KV caching, to DPO/GRPO alignment, weight-space merging (task arithmetic, TIES), and quantization error bounds — needed to **build, train, align, merge, and deploy** multimodal AI models, even on limited hardware.
 

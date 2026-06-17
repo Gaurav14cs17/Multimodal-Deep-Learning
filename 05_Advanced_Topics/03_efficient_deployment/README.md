@@ -418,3 +418,31 @@ This is the **final notebook** of the course. You've built, trained, aligned, an
 - Module 04 (LoRA, quantization concepts from QLoRA)
 - Module 05 Notebooks 01–02 (LLaVA, multi-modal models)
 - Basic understanding of model serving and APIs
+
+---
+
+## 🔬 Worked Examples in the Notebook
+
+### Full Deployment Pipeline Report
+- Benchmark: FP32 → INT8 → torch.compile → ONNX Runtime
+- Measure latency and model size at each stage
+- INT8 dynamic quantization: ~2-4x size reduction
+- ONNX Runtime: consistent cross-platform inference
+- Production architecture: load balancer + vLLM + vector DB + monitoring
+
+> 💡 **Run the notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/03_efficient_deployment/03_efficient_deployment.ipynb)
+
+---
+
+## 📄 Paper Figures in the Notebook
+
+| Figure | Paper | Year | Key Concept |
+|--------|-------|------|-------------|
+| Model Optimization Pipeline | Multiple papers | 2022-23 | FP32 → quantization → graph optimization → serving → production |
+
+### Key Papers for Deployment
+
+- **FlashAttention** (Dao et al., 2022) — IO-aware exact attention, 2-4× speedup
+- **vLLM** (Kwon et al., 2023) — PagedAttention, continuous batching, 24× throughput
+- **GPTQ** (Frantar et al., 2023) — Post-training quantization via approximate 2nd order
+- **AWQ** (Lin et al., 2023) — Activation-aware weight quantization

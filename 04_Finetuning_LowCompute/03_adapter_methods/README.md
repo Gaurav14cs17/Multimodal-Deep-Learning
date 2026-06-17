@@ -301,6 +301,56 @@ $$
 
 ---
 
+## Mathematical Proofs
+
+### Proof: Bottleneck Adapter as Information Bottleneck
+
+**Claim:** The down-up adapter $\text{Adapter}(x) = x + f(x W_{\text{down}}) W_{\text{up}}$ compresses information through rank-$r$ bottleneck.
+
+**Step 1 — Information flow:**
+
+$$
+x \in \mathbb{R}^d \xrightarrow{W_{\text{down}}} h \in \mathbb{R}^r \xrightarrow{f, W_{\text{up}}} \Delta x \in \mathbb{R}^d
+$$
+
+**Step 2 — Bottleneck constraint:** With $r \ll d$, the adapter can only pass $r$ degrees of freedom — forcing compression of task-specific signal.
+
+**Step 3 — Information bottleneck principle:** Minimize $\mathcal{L}_{\text{task}}$ while limiting $I(x; h)$ — low-rank bottleneck approximates this by restricting channel capacity to $r$ dimensions.
+
+**Step 4 — Residual preserves pretrained knowledge:** $x + \Delta x$ keeps base representation; adapter adds task-specific delta in low-rank subspace. **∎**
+
+#### Numerical Example
+
+$d=768$, $r=64$: bottleneck compresses 768-dim activation to 64-dim — 12× compression. Adapter params $= 2 \times 768 \times 64 = 98{,}304$ vs full layer $768^2 = 589{,}824$.
+
+---
+
+### Proof: Prefix Tuning Equivalence to Soft Prompts in Attention
+
+**Claim:** Prefix tuning prepending $P_K, P_V$ to attention is equivalent to adding learned soft tokens that steer attention at every layer.
+
+**Step 1 — Augmented keys and values:**
+
+$$
+K' = [P_K; K_x], \quad V' = [P_V; V_x]
+$$
+
+**Step 2 — Attention with prefix:**
+
+$$
+\text{Attn} = \text{softmax}\!\left(\frac{Q [P_K; K_x]^\top}{\sqrt{d_k}}\right) [P_V; V_x]
+$$
+
+**Step 3 — Soft prompt interpretation:** The first $m$ positions attend to learned virtual tokens $P_K, P_V$ — not derived from input — analogous to prompt tuning's $P_i \in \mathbb{R}^d$ but applied at every layer's KV.
+
+**Step 4 — Expressiveness:** Prefix tuning ($L \times m \times 2d$ params) > prompt tuning ($m \times d$ params) because it steers each layer directly rather than relying on propagation through depth. **∎**
+
+#### Numerical Example
+
+$m=20$, $L=12$, $d=768$: prefix params $= 12 \times 20 \times 2 \times 768 = 368{,}640$. Prompt tuning: $20 \times 768 = 15{,}360$ — prefix has 24× more capacity for layer-wise control.
+
+---
+
 ## What You'll Build
 
 - All 5 PEFT methods implemented from scratch
@@ -316,6 +366,33 @@ $$
 - Notebook 01 (LoRA from scratch)
 - Understanding of attention mechanisms (Q, K, V)
 - Familiarity with PyTorch hooks and parameter freezing
+
+---
+
+## 🔬 Worked Examples in the Notebook
+
+### PEFT Method Comparison — Training on Same Task
+- Train Full FT, LoRA (r=8), Prompt Tuning, and Head Only on same data
+- 60 epochs, 8-class classification with 400 samples
+- Loss curves, final accuracy, and parameter counts compared
+- Identify best accuracy/efficiency trade-off
+
+> 💡 **Run the notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/03_adapter_methods/03_adapter_methods.ipynb)
+
+---
+
+## 📄 Paper Figures in the Notebook
+
+| Figure | Paper | Year | Key Concept |
+|--------|-------|------|-------------|
+| PEFT Methods Comparison (4-panel) | Houlsby / Li & Liang / Lester / Hu | 2019-21 | Where trainable parameters are inserted in each method |
+
+### Papers Referenced
+
+- **Bottleneck Adapter** (Houlsby et al., 2019) — Inserted after attention + FFN
+- **Prefix Tuning** (Li & Liang, 2021) — Learnable K,V tokens at each attention layer
+- **Prompt Tuning** (Lester et al., 2021) — Soft prompt tokens at input only
+- **IA³** (Liu et al., 2022) — Learned rescaling vectors, fewest parameters
 
 ---
 

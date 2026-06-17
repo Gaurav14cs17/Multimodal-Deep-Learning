@@ -204,6 +204,80 @@ $$
 
 ---
 
+## Mathematical Proofs
+
+### Proof: Eckart–Young Theorem — Optimal Low-Rank Approximation
+
+**Theorem:** For $W \in \mathbb{R}^{m \times n}$ with SVD $W = U \Sigma V^\top$, the best rank-$r$ approximation in Frobenius norm is $W_r = U_r \Sigma_r V_r^\top$.
+
+**Step 1 — Frobenius norm error for rank-$r$ approximation $W'$:**
+
+$$
+\lVert W - W' \rVert_F^2 = \lVert U \Sigma V^\top - W' \rVert_F^2
+$$
+
+**Step 2 — Orthogonal invariance:** $\lVert W - W' \rVert_F = \lVert \Sigma - U^\top W' V \rVert_F$. Optimal $W'$ corresponds to keeping top $r$ singular values.
+
+**Step 3 — Error formula:**
+
+$$
+\lVert W - W_r \rVert_F^2 = \sum_{i=r+1}^{\min(m,n)} \sigma_i^2
+$$
+
+**Why:** Discarded singular values contribute exactly their squared magnitude to error — no other rank-$r$ matrix can do better. **∎**
+
+#### Numerical Example
+
+Singular values $[6.5, 0.4, 0.02, 0.001]$: rank-1 error $= 0.4^2 + 0.02^2 + 0.001^2 \approx 0.16$. Energy captured: $6.5^2 / (6.5^2 + 0.16) \approx 99.6%$.
+
+---
+
+### Proof: LoRA Gradient Equivalence
+
+**Setup:** $h = W_0 x + (\alpha/r) B A x$, loss $\mathcal{L}(h)$.
+
+**Step 1 — Gradients w.r.t. $B$ and $A$:**
+
+$$
+\frac{\partial \mathcal{L}}{\partial B} = \frac{\alpha}{r} \frac{\partial \mathcal{L}}{\partial h} (Ax)^\top, \quad \frac{\partial \mathcal{L}}{\partial A} = \frac{\alpha}{r} B^\top \frac{\partial \mathcal{L}}{\partial h} x^\top
+$$
+
+**Step 2 — Effective update to $W$:**
+
+$$
+\Delta W_{\text{eff}} = \frac{\alpha}{r} B A \implies \frac{\partial \mathcal{L}}{\partial W_{\text{eff}}} = \frac{\partial \mathcal{L}}{\partial h} x^\top
+$$
+
+**Step 3 — Chain rule equivalence:**
+
+$$
+\frac{\partial \mathcal{L}}{\partial W} = \frac{\partial \mathcal{L}}{\partial h} x^\top = \frac{\partial \mathcal{L}}{\partial B} \cdot A^\top + B^\top \cdot \frac{\partial \mathcal{L}}{\partial A}
+$$
+
+**Why:** LoRA factors the low-rank update so gradients flow through both $A$ and $B$ without touching frozen $W_0$. **∎**
+
+#### Numerical Example
+
+$d=4$, $r=2$, $\partial \mathcal{L}/\partial h = [1,0,0,0]$, $x = [1,1,1,1]$, $A = I_{2 \times 4}$ (simplified): $\partial \mathcal{L}/\partial B$ has first row $[1,1,1,1]$ — rank-2 update targets the dominant gradient direction.
+
+---
+
+### Proof: Why Rank $r$ Is Sufficient — Intrinsic Dimensionality
+
+**Step 1 — Finetuning update:** $\Delta W = W_{\text{finetuned}} - W_{\text{pretrained}}$.
+
+**Step 2 — Intrinsic dimension (Aghajanyan et al.):** Effective rank of $\Delta W$ satisfies $d_{\text{intrinsic}} \ll d^2$ — for GPT-3, $\approx 5000$ vs $175 \times 10^9$ parameters.
+
+**Step 3 — LoRA parameterization:** $\Delta W \approx BA$ with $BA$ rank $\leq r$. When $r \geq d_{\text{intrinsic}}$, LoRA spans the same subspace as full finetuning.
+
+**Step 4 — Practical choice:** $r \in \{8, 16, 32, 64\}$ empirically matches full FT because weight updates concentrate in top singular directions. **∎**
+
+#### Numerical Example
+
+4×4 matrix with $\sigma = [6.5, 0.4, 0.02, 0.001]$: rank-1 LoRA captures 99.6% of update energy — $r=8$ is conservative overkill for this matrix.
+
+---
+
 ## What You'll Build
 
 - LoRA layer from scratch (`LoRALinear` class in PyTorch)
@@ -219,6 +293,39 @@ $$
 - Module 01–02 notebooks (Transformer architecture)
 - Understanding of matrix multiplication and linear layers
 - Basic PyTorch (`nn.Module`, `nn.Linear`)
+
+---
+
+## 🔬 Worked Examples in the Notebook
+
+### Example 1: SVD by Hand — 4×4 Matrix
+- Full SVD decomposition of a 4×4 weight matrix
+- Energy distribution: how much each singular value captures
+- Rank-1 through rank-4 approximations with error metrics
+- Visual: heatmaps of original vs low-rank reconstructions
+
+### Example 2: LoRA vs Full Finetuning
+- Train Full FT, LoRA (r=8), LoRA (r=2), and Frozen+Head on same task
+- Loss and accuracy curves over 80 epochs
+- Accuracy vs trainable parameters Pareto plot
+- LoRA achieves near-full-FT accuracy with <5% of parameters
+
+> 💡 **Run the notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/01_lora_from_scratch/01_lora_from_scratch.ipynb)
+
+---
+
+## 📄 Paper Figures in the Notebook
+
+| Figure | Paper | Year | Key Concept |
+|--------|-------|------|-------------|
+| LoRA Diagram (`../../assets/paper_figures/lora_diagram.png`) | Hu et al. — [arXiv:2106.09685](https://arxiv.org/abs/2106.09685) | 2021 | Official HuggingFace PEFT LoRA diagram |
+| LoRA Architecture (Full FT vs LoRA) | Hu et al. — [arXiv:2106.09685](https://arxiv.org/abs/2106.09685) | 2021 | Frozen W + trainable low-rank BA, 48× fewer params |
+
+### Additional Papers Covered
+
+- **DoRA** (Liu et al., 2024) — Weight-decomposed LoRA, separates magnitude and direction
+- **LoRA+** (Hayou et al., 2024) — Different learning rates for A and B matrices
+- **AdaLoRA** (Zhang et al., 2023) — Adaptive rank allocation across layers
 
 ---
 

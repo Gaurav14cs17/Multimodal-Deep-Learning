@@ -206,6 +206,33 @@ Your custom data should follow this structure:
 
 ---
 
+## 🔬 Worked Examples in the Notebook
+
+### Domain Adaptation — Before vs After LoRA Finetuning
+- Simulate Recall@K on domain-specific data (medical, product, etc.)
+- Compare: generic CLIP (R@1 ~25%) vs LoRA-finetuned (R@1 ~85%)
+- Similarity distribution: matching pairs shift from ~0.3 to ~0.9
+- Real-world pipeline: collect → clean → format → augment → train → evaluate → deploy
+
+> 💡 **Run the notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/04_finetune_clip_custom_data/04_finetune_clip_custom_data.ipynb)
+
+---
+
+## 📄 Paper Figures in the Notebook
+
+| Figure | Paper | Year | Key Concept |
+|--------|-------|------|-------------|
+| CLIP Domain Adaptation Pipeline | CLIP + LoRA + OpenCLIP | 2021-22 | General → domain-specific via LoRA adapters |
+
+### Domain Adaptation Applications
+
+- **Medical imaging:** BiomedCLIP, PubMedCLIP
+- **Remote sensing:** RemoteCLIP for satellite imagery
+- **Retail:** Product search and visual grounding
+- **Industrial:** Defect detection, quality control
+
+---
+
 ## Next Step
 
 **[01_llava_architecture](../../05_Advanced_Topics/01_llava_architecture/)** — How LLaVA connects vision to LLMs

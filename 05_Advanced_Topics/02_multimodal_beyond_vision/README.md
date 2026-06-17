@@ -119,6 +119,84 @@ At 16kHz sampling, we can represent frequencies up to 8kHz (covering most speech
 
 ---
 
+## Mathematical Proofs
+
+### Proof: STFT — From DFT to Windowed Short-Time Analysis
+
+**Step 1 — Discrete Fourier Transform (DFT) of frame $n$:**
+
+$$
+X(k) = \sum_{n=0}^{N-1} x(n) \, e^{-j2\pi kn/N}, \quad k = 0, \ldots, N-1
+$$
+
+**Why:** DFT decomposes a signal into frequency components.
+
+**Step 2 — Localization via windowing:** Multiply signal by window $w(n)$ to analyze local segments:
+
+$$
+x_m(n) = x(n + mH) \cdot w(n)
+$$
+
+where $H$ is hop length, $m$ is frame index.
+
+**Step 3 — STFT definition:**
+
+$$
+X(k, m) = \sum_{n=0}^{N-1} x(n + mH) \, w(n) \, e^{-j2\pi kn/N}
+$$
+
+**Why:** Windowing prevents spectral leakage; hopping gives time resolution.
+
+**Step 4 — Power spectrogram:** $P(k,m) = \lvert X(k,m) \rvert^2$. **∎**
+
+#### Numerical Example
+
+16 kHz audio, $N=400$ (25 ms frame), $H=160$ (10 ms hop): 10 s audio $\approx$ 998 frames, 201 frequency bins ($N/2 + 1$).
+
+---
+
+### Proof: Mel Scale — Logarithmic Perceptual Mapping
+
+**Step 1 — Psychoacoustic observation:** Pitch perception is approximately logarithmic in frequency.
+
+**Step 2 — Mel definition:**
+
+$$
+m = 2595 \log_{10}\!\left(1 + \frac{f}{700}\right)
+$$
+
+**Step 3 — Inverse mapping:**
+
+$$
+f = 700 \left(10^{m/2595} - 1\right)
+$$
+
+**Step 4 — Mel filterbank:** Triangular filters spaced uniformly on mel scale — more filters at low frequencies where human discrimination is finer. **∎**
+
+#### Numerical Example
+
+$f_1 = 100$ Hz → $m_1 = 2595 \log_{10}(1.143) \approx 100$ mel. $f_2 = 1000$ Hz → $m_2 \approx 999$ mel. Equal 100-mel spacing: $\Delta f \approx 43$ Hz at low freq vs $\Delta f \approx 430$ Hz at 1 kHz.
+
+---
+
+### Proof: Nyquist–Shannon Sampling Theorem (Sketch)
+
+**Theorem:** A bandlimited signal with maximum frequency $f_{\max}$ can be perfectly reconstructed from samples at rate $f_s \geq 2 f_{\max}$.
+
+**Step 1 — Sampling:** $x_s(n) = x(n/f_s)$.
+
+**Step 2 — Spectrum replication:** Sampling convolves spectrum with impulses at multiples of $f_s$.
+
+**Step 3 — No aliasing iff replicas don't overlap:** Requires $f_s/2 \geq f_{\max}$, i.e. $f_{\max} = f_s/2$ (Nyquist frequency).
+
+**Step 4 — Speech at 16 kHz:** $f_{\max} = 8$ kHz — sufficient for telephony (300–3400 Hz) and most speech harmonics. **∎**
+
+#### Numerical Example
+
+Pure tone at 5 kHz sampled at 8 kHz ($f_s/2 = 4$ kHz): aliasing folds to 3 kHz — demonstrates why 16 kHz ($f_{\max}=8$ kHz) is needed for 4 kHz bandwidth.
+
+---
+
 ## Part 2: Audio-Text Models (CLAP)
 
 ### Architecture — CLAP (Contrastive Language-Audio Pretraining)
@@ -304,6 +382,65 @@ $$
 - Module 02 (CLIP, contrastive learning)
 - Module 03 (InfoNCE loss)
 - Basic signal processing concepts (frequency, sampling)
+
+---
+
+## 🔬 Worked Examples in the Notebook
+
+### Audio Processing — STFT from Scratch
+- Generate synthetic audio signal with 3 frequencies (220, 440, 880 Hz)
+- Compute STFT: 512-point FFT, Hann window, hop=160 samples
+- Build Mel filterbank: 80 filters with denser coverage at low frequencies
+- Convert to log-Mel spectrogram: [80, 101] — input to Whisper/CLAP
+- 4-panel visualization: waveform, spectrogram, filterbank, mel spectrogram
+
+> 💡 **Run the notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/02_multimodal_beyond_vision/02_multimodal_beyond_vision.ipynb)
+
+---
+
+## 📄 Paper Figures in the Notebook
+
+| Figure | Paper | Year | Key Concept |
+|--------|-------|------|-------------|
+| ImageBind Overview (`../../assets/paper_figures/imagebind_overview.png`) | Girdhar et al. — [arXiv:2305.05665](https://arxiv.org/abs/2305.05665) | 2023 | 6-modality binding through shared embedding |
+| Multimodal CoT (`../../assets/paper_figures/mm_cot.png`) | Zhang et al. — [arXiv:2302.00923](https://arxiv.org/abs/2302.00923) | 2023 | Two-stage rationale + answer inference |
+| CLAP Architecture | Elizalde et al. — [arXiv:2206.04769](https://arxiv.org/abs/2206.04769) | 2023 | Audio-text contrastive pretraining + zero-shot classification |
+| Audio SSL Models | Baevski / Hsu / Radford | 2020-23 | wav2vec 2.0, HuBERT, Whisper architectures |
+
+### Advanced Topics — Key Papers & References
+
+#### Multimodal Chain-of-Thought & Visual Reasoning
+
+1. **Multimodal Chain-of-Thought Reasoning in Language Models** — Zhang et al. (2023) — [arXiv:2302.00923](https://arxiv.org/abs/2302.00923) — Two-stage rationale + answer inference
+2. **VisProg: Visual Programming for Compositional Visual Reasoning** — Gupta & Kembhavi (2023) — [arXiv:2303.08128](https://arxiv.org/abs/2303.08128) — LLM-driven visual programming
+
+#### Multimodal Hallucination
+
+3. **Evaluating Object Hallucination in Large Vision-Language Models (POPE)** — Li et al. (2023) — [arXiv:2305.10355](https://arxiv.org/abs/2305.10355) — Systematic object hallucination benchmark
+4. **HallusionBench: You See What You Think? Or You Think What You See?** — Guan et al. (2023) — [arXiv:2310.14566](https://arxiv.org/abs/2310.14566) — Image-context reasoning hallucination
+5. **Mitigating Hallucination in Large Multi-Modal Models via Robust Instruction Tuning (RLHF-V)** — Yu et al. (2023) — [arXiv:2306.14565](https://arxiv.org/abs/2306.14565) — RLHF for hallucination reduction
+
+#### Evaluation Benchmarks
+
+6. **MME: A Comprehensive Evaluation Benchmark for Multimodal LLMs** — Fu et al. (2023) — [arXiv:2306.13394](https://arxiv.org/abs/2306.13394)
+7. **MMMU: A Massive Multi-Discipline Multimodal Understanding Benchmark** — Yue et al. (2023) — [arXiv:2311.16502](https://arxiv.org/abs/2311.16502)
+8. **SEED-Bench: Benchmarking Multimodal LLMs with Generative Comprehension** — Li et al. (2023) — [arXiv:2307.16125](https://arxiv.org/abs/2307.16125)
+9. **MathVista: Evaluating Mathematical Reasoning in Visual Contexts** — Lu et al. (2023) — [arXiv:2310.02255](https://arxiv.org/abs/2310.02255)
+
+#### Multimodal In-Context Learning
+
+10. **Flamingo: a Visual Language Model for Few-Shot Learning** — Alayrac et al. (2022) — [arXiv:2204.14198](https://arxiv.org/abs/2204.14198) — Interleaved image-text few-shot prompting
+11. **MMICL: Empowering Vision-Language Model with Multi-Modal In-Context Learning** — Zhao et al. (2023) — [arXiv:2309.07915](https://arxiv.org/abs/2309.07915)
+12. **Generative Pretraining in Multimodality (Emu)** — Sun et al. (2023) — [arXiv:2307.05222](https://arxiv.org/abs/2307.05222) — Unified multimodal pretraining
+
+### Additional Papers Covered
+
+- **wav2vec 2.0** (Baevski et al., 2020) — Contrastive learning on masked audio segments
+- **HuBERT** (Hsu et al., 2021) — Offline clustering pseudo-labels + masked prediction
+- **Whisper** (Radford et al., 2023) — Supervised ASR at scale (680K hours)
+- **TimeSformer** (Bertasius et al., 2021) — Divided space-time attention for video
+- **Video-LLaVA** (Lin et al., 2023) — Frame sampling + concatenation for video LLM
+- **SAM** (Kirillov et al., 2023) — Foundation model for segmentation (SA-1B dataset)
 
 ---
 
