@@ -2,11 +2,11 @@
 
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C?logo=pytorch&logoColor=white)
-![Notebooks](https://img.shields.io/badge/Notebooks-17-orange?logo=jupyter&logoColor=white)
+![Notebooks](https://img.shields.io/badge/Notebooks-28-orange?logo=jupyter&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Low Compute](https://img.shields.io/badge/Runs%20On-CPU%20%2F%20Free%20Colab-brightgreen)
 
-> **Master multimodal AI step-by-step with 17 visual, hands-on Jupyter notebooks.**
+> **Master multimodal AI step-by-step with 28 visual, hands-on Jupyter notebooks.**
 > Designed for **low compute** environments (CPU / single GPU / Google Colab free tier).
 
 ```
@@ -151,11 +151,14 @@ MultiModel/
 │   ├── README.md                                # Module guide
 │   └── 00_environment_check/00_environment_check.ipynb               # Verify setup, benchmark, roadmap
 │
-├── 01_Multimodal_Foundations/                    # [1-2 hrs]
+├── 01_Multimodal_Foundations/                    # [2-3 hrs]
 │   ├── README.md                                # Deep math guide: ViT, attention, fusion
 │   ├── 01_what_is_multimodal/01_what_is_multimodal.ipynb              # Landscape, alignment problem
 │   ├── 02_modality_encoders/02_modality_encoders.ipynb               # ViT & text encoder from scratch
-│   └── 03_fusion_strategies/03_fusion_strategies.ipynb               # Early/Late/Cross/Gated fusion
+│   ├── 03_fusion_strategies/03_fusion_strategies.ipynb               # Early/Late/Cross/Gated fusion
+│   ├── 04_attention_mechanism/04_attention_mechanism.ipynb           # Self-attn, multi-head, complexity
+│   ├── 05_transformer_architecture/05_transformer_architecture.ipynb # Full encoder-decoder
+│   └── 06_tokenization_embeddings/06_tokenization_embeddings.ipynb   # BPE, WordPiece, patch embed
 │
 ├── 02_Vision_Language_Models/                   # [2-3 hrs]
 │   ├── README.md                                # Deep math guide: CLIP, captioning, VQA
@@ -163,11 +166,13 @@ MultiModel/
 │   ├── 02_image_captioning/02_image_captioning.ipynb                # Encoder-decoder captioning
 │   └── 03_visual_question_answering/03_visual_question_answering.ipynb       # VQA with attention maps
 │
-├── 03_Training_Strategies/                      # [2-3 hrs] ★ CORE FOCUS
+├── 03_Training_Strategies/                      # [3-4 hrs] ★ CORE FOCUS
 │   ├── README.md                                # Deep math guide: InfoNCE, AdamW, scheduling
 │   ├── 01_contrastive_learning/01_contrastive_learning.ipynb            # InfoNCE deep dive + temperature
 │   ├── 02_pretraining_objectives/02_pretraining_objectives.ipynb          # ITC, ITM, MLM, generation
-│   └── 03_training_pipeline/03_training_pipeline.ipynb               # Full loop, grad accum, scheduling
+│   ├── 03_training_pipeline/03_training_pipeline.ipynb               # Full loop, grad accum, scheduling
+│   ├── 04_multimodal_alignment/04_multimodal_alignment.ipynb           # Projection heads, Recall@K
+│   └── 05_scaling_laws/05_scaling_laws.ipynb                         # Chinchilla, compute-optimal
 │
 ├── 04_Finetuning_LowCompute/                   # [3-4 hrs] ★ CORE FOCUS
 │   ├── README.md                                # Deep math guide: SVD, LoRA, NF4, PEFT
@@ -176,18 +181,60 @@ MultiModel/
 │   ├── 03_adapter_methods/03_adapter_methods.ipynb                 # Prefix/Prompt/IA3/BitFit
 │   └── 04_finetune_clip_custom_data/04_finetune_clip_custom_data.ipynb       # End-to-end LoRA finetuning
 │
-├── 05_Advanced_Topics/                          # [2-3 hrs]
+├── 05_Advanced_Topics/                          # [4-5 hrs]
 │   ├── README.md                                # Deep math guide: LLaVA, STFT, KV cache
 │   ├── 01_llava_architecture/01_llava_architecture.ipynb              # Mini-LLaVA from scratch
 │   ├── 02_multimodal_beyond_vision/02_multimodal_beyond_vision.ipynb        # Audio + Video encoders
-│   └── 03_efficient_deployment/03_efficient_deployment.ipynb            # ONNX, quantization, Gradio
+│   ├── 03_efficient_deployment/03_efficient_deployment.ipynb            # ONNX, quantization, Gradio
+│   ├── 04_diffusion_models/04_diffusion_models.ipynb                  # DDPM, DDIM, latent diffusion
+│   ├── 05_evaluation_benchmarks/05_evaluation_benchmarks.ipynb          # MMMU, MME, MM-Bench
+│   ├── 06_multimodal_reasoning/06_multimodal_reasoning.ipynb          # Visual CoT, grounding
+│   ├── 07_text_to_image_video/07_text_to_image_video.ipynb            # DALL-E, Stable Diffusion, video
+│   └── 08_multimodal_agents/08_multimodal_agents.ipynb                # Tool use, ReAct agents
 │
-└── utils/                                       # Shared code
-    ├── README.md                                # API reference
-    ├── __init__.py
-    ├── visualization.py                         # 10+ plotting functions
-    └── helpers.py                               # Training loop, data utils
+├── 06_Datasets_Benchmarks/                     # [1-2 hrs]
+│   ├── README.md                                # Dataset catalog + curation math
+│   └── 01_multimodal_datasets/01_multimodal_datasets.ipynb           # Load, analyze, preprocess data
+│
+├── utils/                                       # Shared code
+│   ├── README.md                                # API reference
+│   ├── __init__.py
+│   ├── visualization.py                         # 10+ plotting functions
+│   └── helpers.py                               # Training loop, data utils
+│
+└── assets/
+    └── paper_figures/                           # Real figures from research papers
+        ├── clip_overview.png
+        ├── vit_architecture.png
+        ├── blip2_framework.png
+        ├── simclr_framework.png
+        ├── llava_arch.png
+        ├── lora_diagram.png
+        ├── imagebind_overview.png
+        ├── rlhf_pipeline.png
+        └── mm_cot.png
 ```
+
+---
+
+## 📄 Paper Figures & References
+
+This project includes real architecture diagrams from landmark research papers:
+
+| Paper | Figure | Used In |
+|-------|--------|---------|
+| CLIP (Radford et al., 2021) | Contrastive pretraining overview | Module 01, 02 |
+| ViT (Dosovitskiy et al., 2020) | Patch + Transformer architecture | Module 01 |
+| BLIP-2 (Li et al., 2023) | Q-Former + frozen LLM | Module 02 |
+| SimCLR (Chen et al., 2020) | Contrastive framework | Module 03 |
+| LLaVA (Liu et al., 2023) | Two-stage training | Module 05 |
+| LoRA (Hu et al., 2021) | Low-rank adaptation | Module 04 |
+| ImageBind (Girdhar et al., 2023) | 6-modality binding | Module 05 |
+| RLHF Pipeline (Ouyang et al., 2022) | SFT → RM → PPO | Module 03 |
+
+### Related Resources
+
+- 📚 [Awesome-Multimodal-Large-Language-Models](https://github.com/BradyFU/Awesome-Multimodal-Large-Language-Models) — Curated list of multimodal LLM papers and resources
 
 ---
 
@@ -224,28 +271,39 @@ Every notebook has a built-in Colab setup cell that clones the repo and installs
 | 01 | What is Multimodal? | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/01_what_is_multimodal/01_what_is_multimodal.ipynb) |
 | 02 | Modality Encoders | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/02_modality_encoders/02_modality_encoders.ipynb) |
 | 03 | Fusion Strategies | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/03_fusion_strategies/03_fusion_strategies.ipynb) |
-| 04 | CLIP from Scratch | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/02_Vision_Language_Models/01_clip_from_scratch/01_clip_from_scratch.ipynb) |
-| 05 | Image Captioning | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/02_Vision_Language_Models/02_image_captioning/02_image_captioning.ipynb) |
-| 06 | Visual Question Answering | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/02_Vision_Language_Models/03_visual_question_answering/03_visual_question_answering.ipynb) |
-| 07 | Contrastive Learning | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/01_contrastive_learning/01_contrastive_learning.ipynb) |
-| 08 | Pretraining Objectives | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/02_pretraining_objectives/02_pretraining_objectives.ipynb) |
-| 09 | Training Pipeline | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/03_training_pipeline/03_training_pipeline.ipynb) |
-| 10 | LoRA from Scratch | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/01_lora_from_scratch/01_lora_from_scratch.ipynb) |
-| 11 | QLoRA 4-bit Finetuning | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/02_qlora_4bit_finetuning/02_qlora_4bit_finetuning.ipynb) |
-| 12 | Adapter Methods | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/03_adapter_methods/03_adapter_methods.ipynb) |
-| 13 | Finetune CLIP with LoRA | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/04_finetune_clip_custom_data/04_finetune_clip_custom_data.ipynb) |
-| 14 | LLaVA Architecture | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/01_llava_architecture/01_llava_architecture.ipynb) |
-| 15 | Multimodal Beyond Vision | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/02_multimodal_beyond_vision/02_multimodal_beyond_vision.ipynb) |
-| 16 | Efficient Deployment | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/03_efficient_deployment/03_efficient_deployment.ipynb) |
+| 04 | Attention Mechanism | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/04_attention_mechanism/04_attention_mechanism.ipynb) |
+| 05 | Transformer Architecture | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/05_transformer_architecture/05_transformer_architecture.ipynb) |
+| 06 | Tokenization & Embeddings | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/01_Multimodal_Foundations/06_tokenization_embeddings/06_tokenization_embeddings.ipynb) |
+| 07 | CLIP from Scratch | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/02_Vision_Language_Models/01_clip_from_scratch/01_clip_from_scratch.ipynb) |
+| 08 | Image Captioning | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/02_Vision_Language_Models/02_image_captioning/02_image_captioning.ipynb) |
+| 09 | Visual Question Answering | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/02_Vision_Language_Models/03_visual_question_answering/03_visual_question_answering.ipynb) |
+| 10 | Contrastive Learning | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/01_contrastive_learning/01_contrastive_learning.ipynb) |
+| 11 | Pretraining Objectives | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/02_pretraining_objectives/02_pretraining_objectives.ipynb) |
+| 12 | Training Pipeline | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/03_training_pipeline/03_training_pipeline.ipynb) |
+| 13 | Multimodal Alignment | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/04_multimodal_alignment/04_multimodal_alignment.ipynb) |
+| 14 | Scaling Laws | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/03_Training_Strategies/05_scaling_laws/05_scaling_laws.ipynb) |
+| 15 | LoRA from Scratch | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/01_lora_from_scratch/01_lora_from_scratch.ipynb) |
+| 16 | QLoRA 4-bit Finetuning | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/02_qlora_4bit_finetuning/02_qlora_4bit_finetuning.ipynb) |
+| 17 | Adapter Methods | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/03_adapter_methods/03_adapter_methods.ipynb) |
+| 18 | Finetune CLIP with LoRA | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/04_Finetuning_LowCompute/04_finetune_clip_custom_data/04_finetune_clip_custom_data.ipynb) |
+| 19 | LLaVA Architecture | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/01_llava_architecture/01_llava_architecture.ipynb) |
+| 20 | Multimodal Beyond Vision | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/02_multimodal_beyond_vision/02_multimodal_beyond_vision.ipynb) |
+| 21 | Efficient Deployment | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/03_efficient_deployment/03_efficient_deployment.ipynb) |
+| 22 | Diffusion Models | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/04_diffusion_models/04_diffusion_models.ipynb) |
+| 23 | Evaluation & Benchmarks | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/05_evaluation_benchmarks/05_evaluation_benchmarks.ipynb) |
+| 24 | Multimodal Reasoning | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/06_multimodal_reasoning/06_multimodal_reasoning.ipynb) |
+| 25 | Text-to-Image & Video | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/07_text_to_image_video/07_text_to_image_video.ipynb) |
+| 26 | Multimodal Agents | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/05_Advanced_Topics/08_multimodal_agents/08_multimodal_agents.ipynb) |
+| 27 | Multimodal Datasets | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gaurav14cs17/Multimodal-Deep-Learning/blob/main/06_Datasets_Benchmarks/01_multimodal_datasets/01_multimodal_datasets.ipynb) |
 
 ---
 
 ## Learning Path (Recommended Order)
 
 ```
-Module 00 ──→ Module 01 ──→ Module 02 ──→ Module 03 ──→ Module 04 ──→ Module 05
- (Setup)     (Foundations)   (Models)     (Training)    (Finetuning)   (Advanced)
- 15 min       1-2 hrs       2-3 hrs       2-3 hrs       3-4 hrs       2-3 hrs
+Module 00 ──→ Module 01 ──→ Module 02 ──→ Module 03 ──→ Module 04 ──→ Module 05 ──→ Module 06
+ (Setup)     (Foundations)   (Models)     (Training)    (Finetuning)   (Advanced)    (Datasets)
+ 15 min       2-3 hrs       2-3 hrs       3-4 hrs       3-4 hrs       4-5 hrs       1-2 hrs
                                             ★               ★
                                         CORE FOCUS      CORE FOCUS
 ```
@@ -275,8 +333,10 @@ Module 00 ──→ Module 01 ──→ Module 02 ──→ Module 03 ──→ 
 │       │         Math: SVD, Eckart-Young, NF4 quantiles, rank selection      │
 │       ▼                                                                      │
 │  Module 05 ─── "How do I build & deploy LLaVA?"                             │
-│               LLaVA architecture, audio/video encoders, ONNX, Gradio        │
-│               Math: KV cache, STFT, Mel scale, knowledge distillation       │
+│       │         LLaVA, diffusion, eval, reasoning, agents, deployment       │
+│       ▼                                                                      │
+│  Module 06 ─── "What data do I train on?"                                   │
+│               LAION/CC/DataComp, instruction data, benchmarks, curation     │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -286,12 +346,13 @@ Module 00 ──→ Module 01 ──→ Module 02 ──→ Module 03 ──→ 
 | # | Module | Notebooks | What You Build | Key Visuals |
 |---|--------|-----------|---------------|-------------|
 | **00** | Setup | 1 | Environment check | Benchmark charts, roadmap |
-| **01** | Foundations | 3 | ViT encoder, text encoder, fusion layers | Architecture diagrams, patch visualization, encoder comparison |
+| **01** | Foundations | 6 | ViT encoder, text encoder, fusion, attention, transformer, tokenization | Architecture diagrams, patch visualization, attention heatmaps |
 | **02** | Vision-Language | 3 | CLIP, image captioner, VQA model | Similarity matrices, attention heatmaps, generation steps |
-| **03** | Training | 3 | Contrastive loss, multi-objective, full pipeline | InfoNCE step-by-step, temperature analysis, training evolution |
+| **03** | Training | 5 | Contrastive loss, multi-objective, pipeline, alignment, scaling | InfoNCE step-by-step, temperature analysis, scaling curves |
 | **04** | Finetuning | 4 | LoRA layer, QLoRA, adapters, CLIP finetune | LoRA diagram, memory comparison, parameter savings |
-| **05** | Advanced | 3 | Mini-LLaVA, audio/video encoder, ONNX export | LLaVA architecture, deployment options, speed benchmarks |
-| | **Total** | **17** | | **54 visual plots** |
+| **05** | Advanced | 8 | Mini-LLaVA, audio/video, ONNX, diffusion, eval, reasoning, gen, agents | LLaVA architecture, deployment, diffusion sampling |
+| **06** | Datasets | 1 | Data loading, preprocessing, quality filtering | Distribution plots, dataset scale comparison |
+| | **Total** | **28** | | **60+ visual plots** |
 
 ---
 
@@ -640,14 +701,16 @@ This project draws inspiration from and builds upon the work of:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| **1.4.0** | June 2026 | End-to-end completion: filled 10 scaffold notebooks, added Module 06 (Datasets & Benchmarks), paper references with arXiv links |
+| **1.3.0** | June 2026 | Comprehensive audit: 10 new notebooks (attention, transformer, tokenization, alignment, scaling, diffusion, eval, reasoning, generation, agents); full derivations added to all READMEs |
 | **1.2.0** | June 2026 | Added RLHF/DPO/GRPO, weight-space merging, LoRA+RL integration across Modules 03–05 |
 | **1.1.0** | June 2026 | Deep mathematical overhaul — full derivations, worked examples, proofs in all module READMEs |
 | **1.0.0** | June 2026 | Initial release — 17 notebooks, 6 modules, 54 visualizations |
 
 ---
 
-**Total: 17 notebooks | 10+ models from scratch | 15 training techniques | 54 visual plots**
+**Total: 28 notebooks | 10+ models from scratch | 15+ training techniques | 60+ visual plots**
 
-**Estimated total time: 12-16 hours of focused learning.**
+**Estimated total time: 20-26 hours of focused learning.**
 
 Happy learning!
